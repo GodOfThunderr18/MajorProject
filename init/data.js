@@ -107,18 +107,18 @@ const sampleListings = [
     location: "Verbier",
     country: "Switzerland",
   },
-  {
-    title: "Safari Lodge in the Serengeti",
-    description:
-      "Experience the thrill of the wild in a comfortable safari lodge. Witness the Great Migration up close.",
-    image: {
-      filename: "listingimage",
-      url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjl8fG1vdW50YWlufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    price: 4000,
-    location: "Serengeti National Park",
-    country: "Tanzania",
-  },
+  // {
+  //   title: "Safari Lodge in the Serengeti",
+  //   description:
+  //     "Experience the thrill of the wild in a comfortable safari lodge. Witness the Great Migration up close.",
+  //   image: {
+  //     filename: "listingimage",
+  //     url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjl8fG1vdW50YWlufGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+  //   },
+  //   price: 4000,
+  //   location: "Serengeti National Park",
+  //   country: "Tanzania",
+  // },
   {
     title: "Historic Canal House",
     description:
