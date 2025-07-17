@@ -1,5 +1,11 @@
-.body{
+body{
  font-family: "Plus Jakarta Sans", sans-serif !important;
+ display: flex;
+ flex-direction: column;
+ min-height: 100vh;
+}
+.container{
+    flex:1;
 }
 
 /*Navbar */
@@ -89,3 +95,34 @@
     background-color: white;
 }
 
+
+/* new listing */
+
+
+.add-btn{
+    background-color:  red !important;
+    border: none !important;
+}
+
+
+/*edit page*/
+.edit-btn{
+    background-color:  red !important;
+    border: none !important;
+}
+
+
+/* show page */
+
+.show-img{
+    height: 30vh;
+}
+
+.btns{
+    display:flex;
+}
+
+.show-card{
+    padding-left: 0;
+    padding-right: 0;
+}
