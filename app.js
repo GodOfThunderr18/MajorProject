@@ -14,6 +14,20 @@ const ejsMate=require("ejs-mate");
 app.engine('ejs',ejsMate);
 
 const wrapAsync=require('./utils/wrapAsync');
+const ExpressError=require('./utils/ExpressError');
+const {ListingSchema}=require('./schema');
+
+//validation mw
+const validateListing=(req,res,next)=>{
+    let {error}=ListingSchema.validate(req.body);
+    if(error){
+        let errMsg=error.details.map((el)=>el.message).join(",");
+        throw new ExpressError(400,errMsg);
+    }else{
+        next();
+    }
+
+}
 
 
 app.listen(8080,()=>{
@@ -35,18 +49,20 @@ main()
 
 
 //Index route
-app.get("/listings",async (req,res)=>{
+app.get("/listings",wrapAsync(async (req,res)=>{
     const allListings=await Listing.find({});
     res.render("listings/index.ejs",{allListings});
-})
+}));
 
 
 //create
 app.get("/listings/new",(req,res)=>{
     res.render("listings/new.ejs")
 });
-app.post("/listings",wrapAsync(async (req,res,next)=>{
-        const newListing=new Listing(req.body.listing);
+app.post("/listings",validateListing,wrapAsync(async (req,res,next)=>{
+
+
+     const newListing=new Listing(req.body.listing);
      await newListing.save();
      res.redirect("/listings");
      
@@ -57,34 +73,39 @@ app.post("/listings",wrapAsync(async (req,res,next)=>{
 
 
 //show
-app.get("/listings/:id",async (req,res)=>{
+app.get("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
     const listing=await Listing.findById(id);
     res.render("listings/show.ejs",{listing});
 
-})
+}));
 
 
 
 //Update
-app.get("/listings/:id/edit",async (req,res)=>{
+app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
     let id=req.params.id;
     const listing=await Listing.findById(id);
     res.render('listings/edit.ejs',{listing});
-});
+}));
 
-app.put("/listings/:id",async (req,res)=>{
+app.put("/listings/:id",validateListing,wrapAsync(async (req,res)=>{
     let {id}=req.params;
     await Listing.findByIdAndUpdate(id,{...req.body.listing}); 
     res.redirect(`/listings/${id}`);
-})
+}));
 
 
 //Destroy
-app.delete("/listings/:id/delete",async (req,res)=>{
+app.delete("/listings/:id/delete",wrapAsync(async (req,res)=>{
     let {id}=req.params;
     await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
+}));
+
+//all the routes except the above should give page not found erroe
+app.all("/{*splat}",(req,res,next)=>{
+    next(new ExpressError(404,"Page not found"));
 })
 
 
@@ -92,7 +113,9 @@ app.delete("/listings/:id/delete",async (req,res)=>{
 
 app.use((err,req,res,next)=>{
     console.log("---ERROR---");
-    res.send("sonething went wrong");
+    let {status=500,message="Something went wrong"}=err;
+   // res.status(status).send(message);
+   res.status(status).render("error.ejs",{message});
 })
 
 
