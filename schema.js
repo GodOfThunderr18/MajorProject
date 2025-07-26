@@ -7,7 +7,16 @@ module.exports.ListingSchema=Joi.object({
         location:Joi.string().required(),
         country:Joi.string().required(),
         price:Joi.number().min(0).required(),
-        image:Joi.string().allow("",null),
+        image: Joi.object({
+          filename: Joi.string().default("defaultimage.jpg").allow(""),
+          url: Joi.string()
+             .default("https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg")
+             .allow("")
+          }).default({
+         filename: "defaultimage.jpg",
+         url: "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg"
+})
+
         
 
     }).required()
