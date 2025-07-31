@@ -12,6 +12,9 @@ app.use(methodOverride('_method'));
 const ejsMate=require("ejs-mate");
 app.engine('ejs',ejsMate);
 const ExpressError=require('./utils/ExpressError');
+const passport=require('passport');
+const localStrategy=require('passport-local');
+const User=require('./Models/user');
 
 const session=require("express-session");
 const flash=require("connect-flash");
@@ -29,11 +32,20 @@ const sessionOptions={
 app.use(session(sessionOptions));
 app.use(flash());
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success"); //the success variable here is an array
     res.locals.failure=req.flash("failure");
     next();
 })
+
+
 
 
 app.listen(8080,()=>{
@@ -55,11 +67,13 @@ main()
 
 
 //Express router
-const listings=require('./routes/listing');
-const reviews=require('./routes/review');
+const listingsRouter=require('./routes/listing');
+const reviewsRouter=require('./routes/review');
+const useRouter=require('./routes/user');
 
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",reviews);
+app.use("/listings",listingsRouter);
+app.use("/listings/:id/reviews",reviewsRouter);
+app.use("/",useRouter);
 
 
 
