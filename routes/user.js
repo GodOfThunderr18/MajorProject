@@ -17,7 +17,7 @@ router.post("/signup",(async(req,res)=>{
     req.flash("success","Welcome to Wanderlust");
     res.redirect("/listings");
     }catch(er){
-        req.flash("failure",er.message);
+        req.flash("error",er.message);
         res.redirect("/signup");
     }
 
@@ -35,6 +35,17 @@ router.post("/login",passport.authenticate("local",{failureRedirect:'/login',fai
     res.redirect("/listings");
 
 
+})
+
+//logout
+router.get("/logout",(req,res,next)=>{
+    req.logout((err)=>{
+        if(err){
+            return next(err);
+        }
+        req.flash("success","Successfully logged out");
+        res.redirect("/listings");
+    })
 })
 
 module.exports=router;

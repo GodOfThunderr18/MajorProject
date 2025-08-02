@@ -16,6 +16,7 @@ const passport=require('passport');
 const localStrategy=require('passport-local');
 const User=require('./Models/user');
 
+
 const session=require("express-session");
 const flash=require("connect-flash");
 const sessionOptions={
@@ -39,9 +40,10 @@ passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use((req,res,next)=>{
+app.use((req,res,next)=>{ //res.locals sends info to all view files
     res.locals.success=req.flash("success"); //the success variable here is an array
-    res.locals.failure=req.flash("failure");
+    res.locals.error = req.flash("error");
+    res.locals.currUser=req.user;
     next();
 })
 
