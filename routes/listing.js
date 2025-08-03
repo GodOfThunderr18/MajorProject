@@ -4,7 +4,7 @@ const wrapAsync=require('../utils/wrapAsync');
 const ExpressError=require('../utils/ExpressError');
 const {ListingSchema}=require('../schema'); 
 const Listing=require("../Models/listing");
-const {isLoggedIn}=require("../middleware")
+const {isLoggedIn, isOwner}=require("../middleware")
 //validation mw
 const validateListing=(req,res,next)=>{
     let {error}=ListingSchema.validate(req.body);
@@ -41,6 +41,7 @@ function transformImageField(req, res, next) {
 
 router.post("/",transformImageField,isLoggedIn,validateListing,wrapAsync(async (req,res,next)=>{
      const newListing=new Listing(req.body.listing);
+     newListing.owner=req.user._id;
      await newListing.save();
      //we want to flash a msg after saving
      req.flash("success","New listing created!!"); 
@@ -55,7 +56,9 @@ router.post("/",transformImageField,isLoggedIn,validateListing,wrapAsync(async (
 //show
 router.get("/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
-    const listing=await Listing.findById(id).populate('reviews');
+    const listing=await Listing.findById(id)
+    .populate({path:'reviews',populate:{path:'author',},})
+    .populate('owner');
     if(!listing){
         req.flash("error","No such listing");
         return res.redirect("/listings");  // Adding the return ensures the function exits early and does not attempt to render the show page for a non-existent listing.
@@ -67,13 +70,13 @@ router.get("/:id",wrapAsync(async (req,res)=>{
 
 
 //Update
-router.get("/:id/edit",isLoggedIn,wrapAsync(async (req,res)=>{
+router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(async (req,res)=>{
     let id=req.params.id;
     const listing=await Listing.findById(id);
     res.render('listings/edit.ejs',{listing});
 }));
 
-router.put("/:id",isLoggedIn,validateListing,wrapAsync(async (req,res)=>{ 
+router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(async (req,res)=>{ 
     let {id}=req.params;
     await Listing.findByIdAndUpdate(id,{...req.body.listing}); 
     req.flash("success","Listing Updated "); 
@@ -82,7 +85,7 @@ router.put("/:id",isLoggedIn,validateListing,wrapAsync(async (req,res)=>{
 
 
 //Destroy
-router.delete("/:id/delete",isLoggedIn,wrapAsync(async (req,res)=>{
+router.delete("/:id/delete",isLoggedIn,isOwner,wrapAsync(async (req,res)=>{
     let {id}=req.params;
     await Listing.findByIdAndDelete(id);
     req.flash("success","Listing is deleted");
