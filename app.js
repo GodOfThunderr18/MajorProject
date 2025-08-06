@@ -43,7 +43,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{ //res.locals sends info to all view files
     res.locals.success=req.flash("success"); //the success variable here is an array
     res.locals.error = req.flash("error");
-    res.locals.currUser=req.user;
+    res.locals.currUser=req.user; 
     next();
 })
 

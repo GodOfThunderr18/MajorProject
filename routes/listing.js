@@ -5,6 +5,12 @@ const ExpressError=require('../utils/ExpressError');
 const {ListingSchema}=require('../schema'); 
 const Listing=require("../Models/listing");
 const {isLoggedIn, isOwner}=require("../middleware")
+
+const listingController=require("../controllers/listing");
+
+const multer=require('multer');
+const upload=multer({dest:'uploads/'});
+ 
 //validation mw
 const validateListing=(req,res,next)=>{
     let {error}=ListingSchema.validate(req.body);
@@ -18,16 +24,12 @@ const validateListing=(req,res,next)=>{
 }
 
 //index
-router.get("/",wrapAsync(async (req,res)=>{
-    const allListings=await Listing.find({});
-    res.render("listings/index.ejs",{allListings});
-}));
+router.get("/",wrapAsync(listingController.index));
 
 
-//create
-router.get("/new",isLoggedIn,(req,res)=>{
-     res.render("listings/new.ejs")
-});
+//create new listing
+router.get("/new",isLoggedIn,listingController.renderForm);
+
 function transformImageField(req, res, next) {
   if (req.body.listing && typeof req.body.listing.image === 'string') {
     req.body.listing.image = {
@@ -39,57 +41,24 @@ function transformImageField(req, res, next) {
 }
 
 
-router.post("/",transformImageField,isLoggedIn,validateListing,wrapAsync(async (req,res,next)=>{
-     const newListing=new Listing(req.body.listing);
-     newListing.owner=req.user._id;
-     await newListing.save();
-     //we want to flash a msg after saving
-     req.flash("success","New listing created!!"); 
-     res.redirect("/listings");
-     
-}))
+router.post("/",transformImageField,isLoggedIn,validateListing,wrapAsync(listingController.newListing));
 
 
 
 
 
 //show
-router.get("/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const listing=await Listing.findById(id)
-    .populate({path:'reviews',populate:{path:'author',},})
-    .populate('owner');
-    if(!listing){
-        req.flash("error","No such listing");
-        return res.redirect("/listings");  // Adding the return ensures the function exits early and does not attempt to render the show page for a non-existent listing.
-    }
-    res.render("listings/show.ejs",{listing});
- 
-}));
+router.get("/:id",wrapAsync(listingController.showListing));
 
 
 
 //Update
-router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(async (req,res)=>{
-    let id=req.params.id;
-    const listing=await Listing.findById(id);
-    res.render('listings/edit.ejs',{listing});
-}));
+router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(listingController.renderUpdateForm));
 
-router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(async (req,res)=>{ 
-    let {id}=req.params;
-    await Listing.findByIdAndUpdate(id,{...req.body.listing}); 
-    req.flash("success","Listing Updated "); 
-    res.redirect(`/listings/${id}`);
-}));
+router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing));
 
 
 //Destroy
-router.delete("/:id/delete",isLoggedIn,isOwner,wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    await Listing.findByIdAndDelete(id);
-    req.flash("success","Listing is deleted");
-    res.redirect("/listings");
-}));
+router.delete("/:id/delete",isLoggedIn,isOwner,wrapAsync(listingController.deleteListing));
 
 module.exports=router;
