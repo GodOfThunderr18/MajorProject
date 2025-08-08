@@ -12,18 +12,20 @@ const listingSchema = new Schema({
     type: String,
   }, 
   image: {
-    filename: {
-      type: String,
-      default: "defaultimage.jpg",
-    },
-    url: {
-      type: String,
-      default: "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg",
-      set: (v) =>
-        v === ""
-          ? "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg"
-          : v,
-    },
+    // filename: {
+    //   type: String,
+    //   default: "defaultimage.jpg",
+    // },
+    // url: {
+    //   type: String,
+    //   default: "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg",
+    //   set: (v) =>
+    //     v === ""
+    //       ? "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg"
+    //       : v,
+    // },
+    url:String,
+    filename:String,
   },
   price: {
     type: Number,

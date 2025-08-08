@@ -9,8 +9,9 @@ const {isLoggedIn, isOwner}=require("../middleware")
 const listingController=require("../controllers/listing");
 
 const multer=require('multer');
-const upload=multer({dest:'uploads/'});
- 
+const {storage}=require("../cloudConfig");
+const upload=multer({storage});
+  
 //validation mw
 const validateListing=(req,res,next)=>{
     let {error}=ListingSchema.validate(req.body);
@@ -41,7 +42,7 @@ function transformImageField(req, res, next) {
 }
 
 
-router.post("/",transformImageField,isLoggedIn,validateListing,wrapAsync(listingController.newListing));
+router.post("/",isLoggedIn,upload.single("listing[image]"),validateListing,wrapAsync(listingController.newListing));
 
 
 
@@ -55,7 +56,7 @@ router.get("/:id",wrapAsync(listingController.showListing));
 //Update
 router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(listingController.renderUpdateForm));
 
-router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing));
+router.put("/:id",isLoggedIn,isOwner,upload.single("listing[image]"),validateListing,wrapAsync(listingController.updateListing));
 
 
 //Destroy
