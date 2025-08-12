@@ -23,9 +23,25 @@ const User=require('./Models/user');
 
 
 const session=require("express-session");
+const MongoStore=require('connect-mongo');
+
 const flash=require("connect-flash");
+
+const store=MongoStore.create({
+    mongoUrl:process.env.ATLASDB_URL,
+    crypto:{
+        secret:process.env.SECRET,
+    },
+    touchAfter:24*3600,//after refreshing we want no changes to occur,it will last till 1 day
+})
+
+store.on("error",()=>{
+    console.log("ERROR in MONGO session store",err);
+});
+
 const sessionOptions={
-    secret:"mysupersecretcode",
+    store,
+    secret:process.env.SECRET,
     resave:false,
     saveUninitialized:true,
     cookie:{
@@ -34,6 +50,8 @@ const sessionOptions={
         httpOnly:true,//security purpose
     }
 };
+
+
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -59,9 +77,11 @@ app.listen(8080,()=>{
     console.log("server is listening");
 });
 
-const MONGO_URL='mongodb://127.0.0.1:27017/wanderlust'
+//const MONGO_URL='mongodb://127.0.0.1:27017/wanderlust'
+const dbUrl=process.env.ATLASDB_URL;
+
 async function main() {
-  await mongoose.connect(MONGO_URL);
+  await mongoose.connect(dbUrl);
 }
 main()
 .then(()=>{
